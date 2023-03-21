@@ -12,7 +12,7 @@
             </h4>
             <p>{{ $post->content }}</p>
         </div>
-        
+        <a href="{{ route("admin.posts.index",$post->id) }}" class="btn btn-primary" >Torna indietro</a>
     </div>
 </div>
 @endsection
