@@ -4,6 +4,7 @@
 <div class="container-fluid mt-4">
     <div class="row justify-content-center">
         <div class="col">
+          @include('partials.success')
             <h1>
                 TUTTI GLI POSTS
             </h1>
@@ -28,11 +29,16 @@
                   <tr>
                     <th scope="row">{{ $post->id }}</th>
                     <td>{{ $post->title }}</td>
-                    <td>{{ $post->slug }}</td>
+                    <td>{{ $post->slug }}</td> 
                     <td>
                         <a href="{{ route("admin.posts.show",$post->id) }}" class="btn btn-primary" >Detagli</a>
-                        <a href="{{ route("admin.posts.update",$post->id) }}" class="btn btn-warning" >Aggiorna</a>
-                        <a href="#" class="btn btn-danger" >Elimina</a>
+                        <a href="{{ route("admin.posts.edit",$post->id) }}" class="btn btn-warning" >Aggiorna</a>
+
+                        <form class="d-inline-block" action="{{ route('admin.posts.destroy',$post->id) }}" method="POST" onsubmit="return confirm('sei sicuro di voler eliminare questo post')">
+                          @csrf
+                          @method("DELETE")
+                          <button class="btn btn-danger">Elimina</button>
+                        </form>
                     </td>
                   </tr>
                 </tbody>
@@ -40,7 +46,7 @@
               </table>
         </div>
     </div>
-    {{ $posts->links() }}
+
     
 </div>
 @endsection

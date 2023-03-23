@@ -18,7 +18,7 @@ class PostController extends Controller
      */
     public function index()
     {
-        $posts=Post::paginate(5);
+        $posts=Post::all();
         return view("admin.posts.index",compact("posts"));
     }
 
@@ -49,7 +49,7 @@ class PostController extends Controller
             "slug"=>$slug,
             "content"=>$data["content"],
         ]);
-        return redirect()->route("admin.posts.show",$newPost);
+        return redirect()->route("admin.posts.show",$newPost)->with("success" , "post aggiunto con successo!");
     }
 
     /**
@@ -71,10 +71,11 @@ class PostController extends Controller
      */
     public function edit(Post $post)
     {
-        //
-    }
-
-    /**
+        return view("admin.posts.edit" ,compact("post"));
+        
+    } 
+ 
+    /** 
      * Update the specified resource in storage.
      *
      * @param  \App\Http\Requests\UpdatePostRequest  $request
@@ -83,17 +84,27 @@ class PostController extends Controller
      */
     public function update(UpdatePostRequest $request, Post $post)
     {
-        //
+        $data = $request->validated();
+        $slug = Str::slug($data["title"]);
+
+
+        $post->update([
+            "title"=>$data["title"],
+            "slug"=>$slug,
+            "content"=>$data["content"],
+        ]);
+        return redirect()->route("admin.posts.show",$post->id)->with("success" , "post aggiornato con successo!");
     }
 
     /**
      * Remove the specified resource from storage.
      *
      * @param  \App\Models\Post  $post
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\Response 
      */
     public function destroy(Post $post)
     {
-        //
+        $post->delete();
+        return redirect()->route("admin.posts.index")->with("success" , "post eliminato con successo!");
     }
 }
