@@ -12,8 +12,14 @@
                 {{ $post->slug }}
             </h4>
             <p>{{ $post->content }}</p>
+            @if ($post->img)
+                <div class="my-4">
+                    <img  class="w-100 " src="{{ asset('storage/'.$post->img) }}" alt="">
+                </div>
+            @endif
+            
         </div>
         <a href="{{ route("admin.posts.index",$post->id) }}" class="btn btn-primary" >Torna indietro</a>
     </div>
 </div>
-@endsection   
+@endsection    

@@ -6,7 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StorePostRequest;
 use App\Http\Requests\UpdatePostRequest;
 use App\Models\Post;
-
+use Dflydev\DotAccessData\Data;
+use Illuminate\Support\Facades\Storage;
 //helpers
 use Illuminate\Support\Str;
 class PostController extends Controller
@@ -40,15 +41,17 @@ class PostController extends Controller
      */
     public function store(StorePostRequest $request)
     {
-        $data = $request->validated();
-        $slug = Str::slug($data["title"]);
+        $data = $request->validated(); 
+        if(array_key_exists("img",$data)){
+            $imgPath = Storage::put("posts",$data["img"]);
+            $data["img"]= $imgPath;
+        }
+        
 
+        $data["slug"] = Str::slug($data["title"]);
+        
 
-        $newPost = Post::create([
-            "title"=>$data["title"],
-            "slug"=>$slug,
-            "content"=>$data["content"],
-        ]);
+        $newPost = Post::create($data);
         return redirect()->route("admin.posts.show",$newPost)->with("success" , "post aggiunto con successo!");
     }
 
@@ -57,7 +60,7 @@ class PostController extends Controller
      * 
      * @param  \App\Models\Post  $post
      * @return \Illuminate\Http\Response
-     */
+     */ 
     public function show(Post $post) 
     {
         return view("admin.posts.show" ,compact("post"));
@@ -85,14 +88,28 @@ class PostController extends Controller
     public function update(UpdatePostRequest $request, Post $post)
     {
         $data = $request->validated();
-        $slug = Str::slug($data["title"]);
+        
+
+        if(array_key_exists("delete_img" ,$data)){
+            if($post->img){
+                Storage::delete($post->img);
+                $post->img=null;
+                $post->save();
+            }
+        }
+
+        
+        else if(array_key_exists("img",$data)){
+            $imgPath = Storage::put("posts",$data["img"]);
+            $data["img"]= $imgPath;
+            if($post->img){
+                Storage::delete($post->img);
+            }
+        }
+        $data["slug"] = Str::slug($data["title"]);
 
 
-        $post->update([
-            "title"=>$data["title"],
-            "slug"=>$slug,
-            "content"=>$data["content"],
-        ]);
+        $post->update($data);
         return redirect()->route("admin.posts.show",$post->id)->with("success" , "post aggiornato con successo!");
     }
 
@@ -104,6 +121,9 @@ class PostController extends Controller
      */
     public function destroy(Post $post)
     {
+        if($post->img){
+            Storage::delete($post->img);
+        }
         $post->delete();
         return redirect()->route("admin.posts.index")->with("success" , "post eliminato con successo!");
     }
